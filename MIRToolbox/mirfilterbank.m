@@ -372,9 +372,9 @@ y = mirfilterbank(orig,option);
 
 
 function y = combinechunk(old,new)
-do = get(old,'Data');
+doo = get(old,'Data');
 to = get(old,'Time');
 dn = get(new,'Data');
 tn = get(new,'Time');
-y = set(old,'Data',{{[do{1}{1};dn{1}{1}]}},...
+y = set(old,'Data',{{[doo{1}{1};dn{1}{1}]}},...
             'Time',{{[to{1}{1};tn{1}{1}]}});

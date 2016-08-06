@@ -21,11 +21,11 @@ if nargin < 5
     verbose = 0;
 end
 
-p = ver('MATLAB');
-if str2num(p.Version) >= 8.3
-    [d,tp,fp,f,l,b,n,ch] = mirread2014(extract,orig,load,folder,verbose);
-    return
-end
+%p = ver('MATLAB');
+%if str2num(p.Version) >= 8.3
+%    [d,tp,fp,f,l,b,n,ch] = mirread2014(extract,orig,load,folder,verbose);
+%    return
+    %end
 
 d = {};
 f = {};

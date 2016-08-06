@@ -251,9 +251,9 @@ for song = 1:length(songs)  %For each audio file
                                 lmj = length(mj);
                                 for kk = 1:lmj
                                     handle = plot(mean(fpj(:,h),1),vj{1,h,k}(kk),'d',...
-                                        'Color',num2col_(mj(kk)),...
+                                        'Color',num2col(mj(kk)),...
                                         'MarkerSize',7+(lmj-kk)*2,...
-                                        'MarkerFaceColor',num2col_(mj(kk)));
+                                        'MarkerFaceColor',num2col(mj(kk)));
                                     if isempty(find(legval == mj(kk)))
                                         legval = [legval mj(kk)];
                                         legobj = [legobj handle];
@@ -284,10 +284,10 @@ for song = 1:length(songs)  %For each audio file
                         %if not(isempty(vj(h,:,k)))
                         if isnan(vold)
                             plot(mean(fpj,1),vj(h,:,k)',...
-                                '-','Color',num2col_(h))
+                                '-','Color',num2col(h))
                         else
                             plot([fold mean(fpj,1)],[vold(h) vj(h,:,k)]',...
-                                '+-','Color',num2col_(h))
+                                '+-','Color',num2col(h))
                             % Current curve linked with curve from
                             % previous segment
                         end
@@ -343,7 +343,7 @@ for song = 1:length(songs)  %For each audio file
                     % Display of the segment rectangle
                     rectangle('Position',[fpj(1),minvi,...
                         fpj(end)-fpj(1),maxvi-minvi]+1e-16,...
-                        'EdgeColor',num2col_(j),'Curvature',.1,'LineWidth',1)
+                        'EdgeColor',num2col(j),'Curvature',.1,'LineWidth',1)
                 end
             end
             if k == l

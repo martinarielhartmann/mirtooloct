@@ -45,6 +45,7 @@ function h = surfplot(varargin)
 
 % Parse possible Axes input
 [cax,args,nargs] = axescheck(varargin{:});
+
 error(nargchk(1,4,nargs))
 
 cax = newplot(cax);
@@ -57,9 +58,9 @@ if nargs == 1
     lims = [ 1 n 1 m];
 elseif nargs == 3
     [x,y,c] = deal(args{1:3});
-    %cc = zeros(size(y,1),size(x,2));
-    %cc(1:size(c,1),1:size(c,2)) = c;
-    hh = surface(x,y,zeros(size(y,1),size(x,2)),c,'parent',cax,'EdgeColor','none');  % Here are the modification
+    cc = zeros(size(y,1),size(x,2));
+    cc(1:size(c,1),1:size(c,2)) = c;
+    hh = surface(x,y,zeros(size(y,1),size(x,2)),cc,'parent',cax,'EdgeColor','none');  % Here are the modification
     lims = [min(min(x)) max(max(x)) min(min(y)) max(max(y))];
 else
     error('Must have one or three input data arguments.')

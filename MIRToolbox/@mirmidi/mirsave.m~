@@ -81,13 +81,13 @@ for i = 1:size(nmat,1)
         fprintf(fid,'\\bar ""\n');
     end
     if i>1
-        doo = round((nmat(i,4)-nmat(i-1,4))/12);
-        if doo>0
-            for j = 1:doo
+        do = round((nmat(i,4)-nmat(i-1,4))/12);
+        if do>0
+            for j = 1:do
                 p = [p ''''];
             end
-        elseif doo<0
-            for j = 1:-doo
+        elseif do<0
+            for j = 1:-do
                 p = [p ','];
             end
         end

@@ -25,19 +25,11 @@ function [Y,FS,NBITS,OPTS] = mp3read(FILE,N,MONO,DOWNSAMP,DELAY)
 %     mpg123 engine:  MONO = 1 forces output to be mono (by
 %     averaging stereo channels); DOWNSAMP = 2 or 4 downsamples by 
 %     a factor of 2 or 4 (thus FS returns as 22050 or 11025
-%     respectively for a 44 kHz mp3 file); 
-%     To accommodate a bug in mpg123-0.59, DELAY controls how many
+%     respectively for a 44 kHz mp3 file); DELAY controls how many
 %     "warm up" samples to drop at the start of the file; the
 %     default value of 2257 makes an mp3write/mp3read loop for a 44
 %     kHz mp3 file be as close as possible to being temporally
 %     aligned; specify as 0 to prevent discard of initial samples.
-%     For later versions of mpg123 (e.g. 1.9.0) this is not needed; 
-%     a flag in mp3read.m makes the default DELAY zero in this case.
-%
-%   [Y...] = MP3READ(URL...)  uses the built-in network
-%     functionality of mpg123 to read an MP3 file across the
-%     network.  URL must be of the form 'http://...' or
-%     'ftp://...'.  'size' and OPTS are not available in this mode.
 %
 %   Example:
 %   To read an mp3 file as doubles at its original width and sampling rate:
@@ -49,16 +41,13 @@ function [Y,FS,NBITS,OPTS] = mp3read(FILE,N,MONO,DOWNSAMP,DELAY)
 %
 %   Note: Because the mp3 format encodes samples in blocks of 26 ms (at
 %   44 kHz), and because of the "warm up" period of the encoder,
-%   the file length may not be exactly what you expect, depending 
-%   on your version of mpg123 (recent versions fix warmup).
+%   the file length may not be exactly what you expect.
 %
 %   Note: requires external binaries mpg123 and mp3info; you
 %   can find binaries for several platforms at:
 %     http://labrosa.ee.columbia.edu/matlab/mp3read.html
 %
 %   See also mp3write, wavread.
-
-% $Header: /Users/dpwe/matlab/columbiafns/RCS/mp3read.m,v 1.6 2009/12/08 16:35:23 dpwe Exp dpwe $
 
 % 2003-07-20 dpwe@ee.columbia.edu  This version calls mpg123.
 % 2004-08-31 Fixed to read whole files correctly
@@ -74,8 +63,6 @@ function [Y,FS,NBITS,OPTS] = mp3read(FILE,N,MONO,DOWNSAMP,DELAY)
 %            to work cross-platform without editing prior to
 %            submitting to Matlab File Exchange
 % 2007-07-23 Tweaks to 'size' mode so it exactly agrees with read data.
-% 2009-03-15 Added fixes so 'http://...' file URLs will work.
-% 2009-03-26 Added filename length check to http: test (thx fabricio guzman)
 
 % find our baseline directory
 path = fileparts(which('mp3read'));
@@ -104,24 +91,8 @@ if ispc
   ext = 'exe';
   rmcmd = 'del';
 end
-% mpg123-0.59 inserts silence at the start of decoded files, which
-% we compensate.  However, this is fixed in mpg123-1.9.0, so 
-% make this flag 1 only if you have mpg123-0.5.9
-MPG123059 = 0;
-mpg123 = '/usr/local/bin/mpg123';  %%%PJH
-%%%mpg123 = fullfile(path,['mpg123.',ext]);
-mp3info = '/usr/local/bin/mp3info';  %%%PJH
-%%%mp3info = fullfile(path,['mp3info.',ext]);
-
-%%%%% Check for network mode
-if length(FILE) > 6 && (strcmp(lower(FILE(1:7)),'http://') == 1 ...
-      || strcmp(lower(FILE(1:6)),'ftp://'))
-  % mp3info not available over network
-  OVERNET = 1;
-else
-  OVERNET = 0;
-end
-
+mpg123 = fullfile(path,['mpg123.',ext]);
+mp3info = fullfile(path,['mp3info.',ext]);
 
 %%%%% Process input arguments
 if nargin < 2
@@ -135,7 +106,7 @@ if ischar(N)
   N = 0;
 end
 
-if length(N) == 1
+if length(N) == 1 && N
   % Specified N was upper limit
   N = [1 N];
 end
@@ -157,8 +128,12 @@ end
 if downsamp ~= 1 && downsamp ~= 2 && downsamp ~= 4
   error('DOWNSAMP can only be 1, 2, or 4');
 end
-
-% process DELAY option (nargin 5) after we've read the SR
+if nargin < 5
+  mpg123delay44kHz = 2257;  % empirical delay of lame/mpg123 loop
+  delay = round(mpg123delay44kHz/downsamp);
+else
+  delay = DELAY;
+end
 
 if strcmp(FMT,'native') == 0 && strcmp(FMT,'double') == 0 && ...
       strcmp(FMT,'size') == 0
@@ -175,85 +150,56 @@ if isempty(ext)
   FILE = [FILE, '.mp3'];
 end
 
-if ~OVERNET
-  %%%%%% Probe file to find format, size, etc. using "mp3info" utility
-  cmd = ['"',mp3info, '" -r m -p "%Q %u %b %r %v * %C %e %E %L %O %o %p" "', FILE,'"'];
-  % Q = samprate, u = #frames, b = #badframes (needed to get right answer from %u) 
-  % r = bitrate, v = mpeg version (1/2/2.5)
-  % C = Copyright, e = emph, E = CRC, L = layer, O = orig, o = mono, p = pad
-  w = mysystem(cmd);
-  % Break into numerical and ascii parts by finding the delimiter we put in
-  starpos = findstr(w,'*');
-  nums = str2num(w(1:(starpos - 2)));
-  strs = tokenize(w((starpos+2):end));
+%%%%%% Probe file to find format, size, etc. using "mp3info" utility
+cmd = ['"',mp3info, '" -r m -p "%Q %u %b %r %v * %C %e %E %L %O %o %p" "', FILE,'"'];
+% Q = samprate, u = #frames, b = #badframes (needed to get right answer from %u) 
+% r = bitrate, v = mpeg version (1/2/2.5)
+% C = Copyright, e = emph, E = CRC, L = layer, O = orig, o = mono, p = pad
+w = mysystem(cmd);
+% Break into numerical and ascii parts by finding the delimiter we put in
+starpos = findstr(w,'*');
+nums = str2num(w(1:(starpos - 2)));
+strs = tokenize(w((starpos+2):end));
 
-  SR = nums(1);
-  nframes = nums(2);
-  nchans = 2 - strcmp(strs{6}, 'mono');
-  layer = length(strs{4});
-  bitrate = nums(4)*1000;
-  mpgv = nums(5);
-  % Figure samples per frame, after
-  % http://board.mp3-tech.org/view.php3?bn=agora_mp3techorg&key=1019510889
-  if layer == 1
-    smpspfrm = 384;
-  elseif SR < 32000 && layer ==3
-    smpspfrm = 576;
-    if mpgv == 1
-      error('SR < 32000 but mpeg version = 1');
-    end
-  else
-    smpspfrm = 1152;
+SR = nums(1);
+nframes = nums(2);
+nchans = 2 - strcmp(strs{6}, 'mono');
+layer = length(strs{4});
+bitrate = nums(4)*1000;
+mpgv = nums(5);
+% Figure samples per frame, after
+% http://board.mp3-tech.org/view.php3?bn=agora_mp3techorg&key=1019510889
+if layer == 1
+  smpspfrm = 384;
+elseif SR < 32000 && layer ==3
+  smpspfrm = 576;
+  if mpgv == 1
+    error('SR < 32000 but mpeg version = 1');
   end
-
-  OPTS.fmt.mpgBitrate = bitrate;
-  OPTS.fmt.mpgVersion = mpgv;
-  % fields from wavread's OPTS
-  OPTS.fmt.nAvgBytesPerSec = bitrate/8;
-  OPTS.fmt.nSamplesPerSec = SR;
-  OPTS.fmt.nChannels = nchans;
-  OPTS.fmt.nBlockAlign = smpspfrm/SR*bitrate/8;
-  OPTS.fmt.nBitsPerSample = NBITS;
-  OPTS.fmt.mpgNFrames = nframes;
-  OPTS.fmt.mpgCopyright = strs{1};
-  OPTS.fmt.mpgEmphasis = strs{2};
-  OPTS.fmt.mpgCRC = strs{3};
-  OPTS.fmt.mpgLayer = strs{4};
-  OPTS.fmt.mpgOriginal = strs{5};
-  OPTS.fmt.mpgChanmode = strs{6};
-  OPTS.fmt.mpgPad = strs{7};
-  OPTS.fmt.mpgSampsPerFrame = smpspfrm;
 else
-  % OVERNET mode
-  OPTS = [];
-  % guesses
   smpspfrm = 1152;
-  SR = 44100;
-  nframes = 0;
 end
-  
+
+OPTS.fmt.mpgBitrate = bitrate;
+OPTS.fmt.mpgVersion = mpgv;
+% fields from wavread's OPTS
+OPTS.fmt.nAvgBytesPerSec = bitrate/8;
+OPTS.fmt.nSamplesPerSec = SR;
+OPTS.fmt.nChannels = nchans;
+OPTS.fmt.nBlockAlign = smpspfrm/SR*bitrate/8;
+OPTS.fmt.nBitsPerSample = NBITS;
+OPTS.fmt.mpgNFrames = nframes;
+OPTS.fmt.mpgCopyright = strs{1};
+OPTS.fmt.mpgEmphasis = strs{2};
+OPTS.fmt.mpgCRC = strs{3};
+OPTS.fmt.mpgLayer = strs{4};
+OPTS.fmt.mpgOriginal = strs{5};
+OPTS.fmt.mpgChanmode = strs{6};
+OPTS.fmt.mpgPad = strs{7};
+OPTS.fmt.mpgSampsPerFrame = smpspfrm;
+
 if SR == 16000 && downsamp == 4
   error('mpg123 will not downsample 16 kHz files by 4 (only 2)');
-end
-
-% process or set delay
-if nargin < 5
-
-  if MPG123059
-    mpg123delay44kHz = 2257;  % empirical delay of lame/mpg123 loop
-    mpg123delay16kHz = 1105;  % empirical delay of lame/mpg123 loop for 16 kHz sampling
-    if SR == 16000
-      rawdelay = mpg123delay16kHz;
-    else
-      rawdelay = mpg123delay44kHz;  % until we know better
-    end
-    delay = round(rawdelay/downsamp);
-  else
-    % seems like predelay is fixed in mpg123-1.9.0
-    delay = 0;
-  end
-else
-  delay = DELAY;
 end
 
 if downsamp == 1
@@ -325,7 +271,7 @@ else
   
   if decblk > 0 && length(Y) < decblk*smpspfrm/downsamp
     % This will happen if the selected block range includes >1 bad block
-    disp(['Warn: requested ', num2str(decblk*smpspfrm/downsamp),' frames, returned ',num2str(length(Y))]);
+    %disp(['Warn: requested ', num2str(decblk*smpspfrm/downsamp),' frames, returned ',num2str(length(Y))]);
   end
   
   % Delete tmp file
@@ -339,22 +285,14 @@ else
       endfrm = length(Y)+sttfrm-skipx;
   end
   
-  disp(['PJH: mp3read.m: 01']);
-  fflush(stdout);
   if endfrm > sttfrm
-    disp(['PJH: mp3read.m: 02, CRAP!']);
-    fflush(stdout);
     Y = Y(skipx+(1:(endfrm-sttfrm)),:);
   elseif skipx > 0
-    disp(['PJH: mp3read.m: 03, CRAP!']);
-    fflush(stdout);
     Y = Y((skipx+1):end,:);
   end
   
   % Convert to int if format = 'native'
   if strcmp(FMT,'native')
-    disp(['PJH: mp3read.m: 04, native']);
-    fflush(stdout);
     Y = int16((2^15)*Y);
   end
 
@@ -373,18 +311,16 @@ w = w((1+max([0,findstr(w,10)])):end);
 %disp([cmd,' -> ','*',w,'*']);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function a = tokenize(s,t)
-% Break space-separated string into cell array of strings.
-% Optional second arg gives alternate separator (default ' ')
+function a = tokenize(s)
+% Break space-separated string into cell array of strings
 % 2004-09-18 dpwe@ee.columbia.edu
-if nargin < 2;  t = ' '; end
 a = [];
 p = 1;
 n = 1;
 l = length(s);
-nss = findstr([s(p:end),t],t);
+nss = findstr([s(p:end),' '],' ');
 for ns = nss
-  % Skip initial spaces (separators)
+  % Skip initial spaces
   if ns == p
     p = p+1;
   else
@@ -395,3 +331,4 @@ for ns = nss
     end
   end
 end
+    

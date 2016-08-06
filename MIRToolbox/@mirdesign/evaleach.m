@@ -513,7 +513,7 @@ if isempty(sg)
                     else
                         if ischar(method{z})
                             if strcmpi(method{z},'Concat')
-                                do = get(old{z},'Data');
+                                doo = get(old{z},'Data');
                                 dn = get(new{z},'Data');
                                 fpo = get(old{z},'FramePos');
                                 fpn = get(new{z},'FramePos');
@@ -522,29 +522,29 @@ if isempty(sg)
                                 end
                                 if isa(old,'mirscalar')
                                     res{z} = set(old{z},...
-                                        'Data',{{[do{1}{1},dn{1}{1}]}},...
+                                        'Data',{{[doo{1}{1},dn{1}{1}]}},...
                                         'FramePos',{{[fpo{1}{1}(1);fpn{1}{1}(2)]}});
                                 else
                                     to = get(old{z},'Pos');
                                     tn = get(new{z},'Pos');
                                     if d2.ascending
                                         res{z} = set(old{z},...
-                                            'Data',{{[do{1}{1};dn{1}{1}]}},...
+                                            'Data',{{[doo{1}{1};dn{1}{1}]}},...
                                             'Pos',{{[to{1}{1};tn{1}{1}]}},...
                                             'FramePos',{{[fpo{1}{1}(1);fpn{1}{1}(2)]}});
                                     else
                                         res{z} = set(old{z},...
-                                            'Data',{{[dn{1}{1};do{1}{1}]}},...
+                                            'Data',{{[dn{1}{1};doo{1}{1}]}},...
                                             'Pos',{{[tn{1}{1};to{1}{1}]}},...
                                             'FramePos',{{[fpo{1}{1}(1);fpn{1}{1}(2)]}});
                                     end
                                 end
                             elseif strcmpi(method{z},'Average') || ...
                                     strcmpi(method{z},'Sum')
-                                do = get(old{z},'Data');
+                                doo = get(old{z},'Data');
                                 dn = get(new{z},'Data');
                                 res{z} = set(old{z},...
-                                            'ChunkData',do{1}{1}+dn{1}{1});
+                                            'ChunkData',doo{1}{1}+dn{1}{1});
                             else
                                 error(['SYNTAX ERROR: ',method{z},...
                             ' is not a known keyword for combinechunk.']);
@@ -909,7 +909,7 @@ end
 
 
 function y = combinesegment(old,new)
-do = get(old,'Data');
+doo = get(old,'Data');
 to = get(old,'Pos');
 fpo = get(old,'FramePos');
 ppo = get(old,'PeakPos');
@@ -937,13 +937,13 @@ tvn = get(new,'TrackVal');
 
 y = old;
 
-if not(isempty(do))
-    y = set(y,'Data',{{do{1}{:},dn{1}{:}}});
+if not(isempty(doo))
+    y = set(y,'Data',{{doo{1}{:},dn{1}{:}}});
 end
 
 y = set(y,'FramePos',{{fpo{1}{:},fpn{1}{:}}}); 
         
-if not(isempty(to)) && size(do{1},2) == size(to{1},2)
+if not(isempty(to)) && size(doo{1},2) == size(to{1},2)
     y = set(y,'Pos',{{to{1}{:},tn{1}{:}}}); 
 end
 

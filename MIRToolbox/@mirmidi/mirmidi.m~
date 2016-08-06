@@ -44,7 +44,7 @@ function m = main(x,option,postoption)
 transcript = 0;
 if iscell(x)
     o = x{1};
-    doo = get(o,'PeakVal');
+    do = get(o,'PeakVal');
     da = get(o,'AttackPosUnit');
     dr = get(o,'ReleasePosUnit');
     a = x{2};
@@ -53,7 +53,7 @@ if iscell(x)
     % x = mircentroid(s);
     dp = get(x,'Data');
 else
-    doo = [];
+    do = [];
     if isa(x,'mirpitch')
         da = get(x,'Start');
         dr = get(x,'End');
@@ -84,13 +84,13 @@ if transcript
 else
     for i = 1:length(dp)
         nmat{i} = [];
-        if isempty(doo)
+        if isempty(do)
             first = 1;
         else
             first = 2;
         end
         for j = first:length(dp{i})
-            if isempty(doo)
+            if isempty(do)
                 tij = df{i}{j}(1);
                 dij = df{i}{j}(2)- tij;
                 vij = 120;
@@ -101,7 +101,7 @@ else
                 else
                     dij = dr{i}{1}{1}(j-1) - tij;
                 end
-                vij = round(doo{i}{1}{1}(j-1)/max(doo{i}{1}{1})*120);
+                vij = round(do{i}{1}{1}(j-1)/max(do{i}{1}{1})*120);
             end
             for k = 1:size(dp{i}{j},3)
                 for l = 1:size(dp{i}{j},2)

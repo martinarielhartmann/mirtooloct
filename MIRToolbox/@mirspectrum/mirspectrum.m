@@ -964,8 +964,8 @@ y = mirspectrum(orig,option);
 
 
 function y = combinechunk(old,new)
-do = get(old,'Data');
-do = do{1}{1};
+doo = get(old,'Data');
+doo = doo{1}{1};
 dn = get(new,'Data');
 dn = dn{1}{1};
-y = set(old,'ChunkData',do+dn);
+y = set(old,'ChunkData',doo+dn);

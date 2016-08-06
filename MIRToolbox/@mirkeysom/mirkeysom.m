@@ -52,7 +52,7 @@ for i = 1:length(m)
             for l = 1:size(mj,3)
                 for kk=1:36
                     for ll=1:24
-                        tmp = corrcoef([mj(:,k,l) somw(:,kk,ll)]);
+                        tmp = corr([mj(:,k,l) somw(:,kk,ll)]);
                         zj(ll,k,l,kk) = tmp(1,2);
                     end
                 end

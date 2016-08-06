@@ -63,8 +63,8 @@ else
         else
             lab = '';
         end
-        disp([vai,' is the ',d.title,' related to ',n{i},lab,...
-            ', of sampling rate ',num2str(f{i}),' Hz.'])
+        %        disp([vai,' is the ',d.title,' related to ',n{i},lab,...
+        %            ', of sampling rate ',num2str(f{i}),' Hz.'])
         if size(v{i},2) == 0
             if isempty(d.init)
                 disp('It does not contain any data.');

@@ -47,7 +47,7 @@ for h = 1:length(m)
         end
         
         if option.center
-            mn = center(mn);
+            mn = center_(mn);
         end
         
         % Negative data is trimmed:

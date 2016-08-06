@@ -1331,15 +1331,15 @@ for i = 1:length(d) % For each audio file,...
                                 ym = dhu(mj-1,k,l);
                                 yp = dhu(mj+1,k,l);
                                 p = (yp-ym)/(2*(2*y0-yp-ym));
-                                vih{1,k,l}(j) = y0 - 0.25*(ym-yp)*p;
+                                vih(1,k,l).(num2str(j)) = y0 - 0.25*(ym-yp)*p;
                                 if p >= 0
-                                    pih{1,k,l}(j) = (1-p)*th(mj,k,l)+p*th(mj+1,k,l);
+                                    pih(1,k,l).(num2str(j)) = (1-p)*th(mj,k,l)+p*th(mj+1,k,l);
                                 elseif p < 0
-                                    pih{1,k,l}(j) = (1+p)*th(mj,k,l)-p*th(mj-1,k,l);
+                                    pih(1,k,l).(num2str(j)) = (1+p)*th(mj,k,l)-p*th(mj-1,k,l);
                                 end
                             else
-                                vih{1,k,l}(j) = dhu(mj,k,l);
-                                pih{1,k,l}(j) = th(mj,k,l);
+                                vih(1,k,l).(num2str(j)) = dhu(mj,k,l);
+                                pih(1,k,l).(num2str(j)) = th(mj,k,l);
                             end
                         end
                     end

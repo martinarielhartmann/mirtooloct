@@ -604,8 +604,8 @@ end
 if isa(o,'mirspectrum')
     [tmp o] = gettmp(o);
     d = get(o,'Data');
-    [do tmp] = mircompute(@newonset,d,tmp);
-    o = mirscalar(o,'Data',do,'Title','Onset curve');
+    [doo tmp] = mircompute(@newonset,d,tmp);
+    o = mirscalar(o,'Data',doo,'Title','Onset curve');
     o = settmp(o,tmp);
 %elseif isa(o,'mircepstrum')
 %    pp = get(o,'PeakPosUnit');
@@ -713,9 +713,9 @@ if not(length(title)>11 && strcmp(title(1:11),'Onset curve'))
 end
 
 
-function [do tmp] = newonset(d,tmp)
+function [doo tmp] = newonset(d,tmp)
 d = d - max(max(max(d)));
-do = zeros(1,size(d,2));
+doo = zeros(1,size(d,2));
 if isempty(tmp)
     activ = [];
     inactiv = [];
@@ -746,7 +746,7 @@ for i = 1:size(d,2)
                 activ(best_a).mag(end+1) = d(new(maj(1)),i);
                 activ(best_a).tim(end+1) = i;
                 if length(activ(best_a).idx) < 10
-                    do(i) = do(i) + d(new(maj(1)),i) + 20;
+                    doo(i) = doo(i) + d(new(maj(1)),i) + 20;
                 end
             elseif old(best_o,2) < -20
                 found = 0;
@@ -758,7 +758,7 @@ for i = 1:size(d,2)
                         activ(end).mag(end+1) = d(new(maj(1)),i);
                         activ(end).tim(end+1) = i;
                         if length(activ(end).idx) < 10
-                            do(i) = do(i) + d(new(maj(1)),i) + 20;
+                            doo(i) = doo(i) + d(new(maj(1)),i) + 20;
                         end
                         found = 1;
                         break
@@ -768,7 +768,7 @@ for i = 1:size(d,2)
                     activ(end+1).idx = new(maj(1));
                     activ(end).mag = d(new(maj(1)),i);
                     activ(end).tim = i;
-                    do(i) = do(i) + d(new(maj(1)),i) + 20;
+                    doo(i) = doo(i) + d(new(maj(1)),i) + 20;
                 end
             end
             new(maj(1)) = [];
@@ -825,20 +825,20 @@ tmp.inactiv = inactiv;
 tmp.old = old;
 
 
-function do = oldnewonset(d)
+function doo = oldnewonset(d)
 tc = 10;
 dy = 2;
-do = NaN(1,size(d,2));
+doo = NaN(1,size(d,2));
 for i = 1:size(d,2)
-    do(i) = 0;
+    doo(i) = 0;
     for j = dy+1:size(d,1)-dy
         ddj = d(j,i) - max(max(d(j+(-dy:+dy),i-1:-1:max(i-tc,1))));
         if ddj > 0
-            do(i) = do(i) + ddj;
+            doo(i) = doo(i) + ddj;
         end
     end
 end
-do
+doo
 
 
 function [st pp] = startattack(d,pp,st) %pv,pm,ppp,ppv)

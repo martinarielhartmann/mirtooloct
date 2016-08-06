@@ -9,7 +9,7 @@ k = 0;
 
 for i = 1:length(p.pattern)
     display(['Pattern # ',num2str(i)])
-    col = num2col_(i);
+    col = num2col(i);
     for j = 1:length(p.pattern{i}.occurrence)
         display(['Occurrence # ',num2str(j)])
         p.pattern{i}.occurrence{j}

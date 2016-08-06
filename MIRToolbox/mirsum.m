@@ -148,7 +148,7 @@ if option.c
     d = get(s,'Data');
     for k = 1:length(d)
         for i = 1:length(d{k})
-            d{k}{i} = center(d{k}{i});
+            d{k}{i} = center_(d{k}{i});
         end
     end
     s = set(s,'Data',d);
@@ -185,11 +185,11 @@ function y = combinechunk(old,new)
 if isa(old,'mirspectrum')
     warning('WARNING IN MIRSUM: not yet fully generalized to mirspectrum')
 end
-do = get(old,'Data');
-do = do{1}{1};
+doo = get(old,'Data');
+doo = doo{1}{1};
 dn = get(new,'Data');
 dn = dn{1}{1};
-if length(dn) < length(do)
-    dn(length(do),:,:) = 0; % Zero-padding
+if length(dn) < length(doo)
+    dn(length(doo),:,:) = 0; % Zero-padding
 end
-y = set(old,'ChunkData',do+dn);
+y = set(old,'ChunkData',doo+dn);

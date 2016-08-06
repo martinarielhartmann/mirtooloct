@@ -15,7 +15,7 @@ for h = 1:length(d)
             irgb = [0 0 0];
         else
             continue
-            irgb = num2col_(i)/2; %shiftdim(1-num2col_(i),-1);
+            irgb = num2col(i)/2; %shiftdim(1-num2col(i),-1);
         end
         mac = 0;
         mic = 1;
